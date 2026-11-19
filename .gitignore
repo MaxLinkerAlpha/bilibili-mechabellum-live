@@ -1,0 +1,17 @@
+# 调研脚本（非成品，不上传）
+probe.py
+probe2.py
+probe3.py
+
+# 本机日志与缓存
+data/collector.log
+__pycache__/
+*.pyc
+*.db-wal
+*.db-shm
+
+# 带时间戳的旧导出（保留本地，不上传）
+output/*_2026*.csv
+output/*_2026*.md
+
+# 注意：data/live.db 是核心数据，必须 commit，不要加进忽略

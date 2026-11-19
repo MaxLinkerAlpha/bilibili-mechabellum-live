@@ -1,0 +1,48 @@
+name: 记录B站钢铁指挥官直播
+
+on:
+  schedule:
+    # UTC 时间，每 5 分钟一轮（GitHub Actions 最小粒度）
+    # 用 */5 会在整点被大量任务挤爆，这里用错开分钟的写法降低延迟
+    - cron: '2-58/5 * * * *'
+  workflow_dispatch:  # 允许手动点"运行"测试
+
+# 关键：必须给写权限，才能把采集结果 commit 回仓库
+permissions:
+  contents: write
+
+# 防止并发跑（手动触发撞上定时）
+concurrency:
+  group: live-record
+  cancel-in-progress: false
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 拉取仓库（含历史数据）
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 采集一轮
+        run: python monitor.py collect --once
+
+      - name: 导出报表
+        run: python query.py export --fixed
+
+      - name: 提交数据变更
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/live.db output/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "无数据变化，跳过提交"
+          else
+            git commit -m "data: $(date -u +'%Y-%m-%d %H:%M') UTC"
+            git push
+          fi
