@@ -10,7 +10,11 @@ B站「钢铁指挥官」直播间/主播 24h 记录器。
 用法见 README.md。
 """
 import argparse, http.cookiejar, json, os, random, re, sys, time, urllib.parse, urllib.request
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+# B站返回的 live_time 字符串是北京时间(UTC+8)。批量接口给的是 unix 时间戳，
+# 必须用固定 +8 转换，否则在 UTC 环境的 GitHub Actions 上会把同一场拆成两条。
+CN_TZ = timezone(timedelta(hours=8))
 
 import config as C
 import db
@@ -26,12 +30,12 @@ def clean(s):
 
 
 def now_iso():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now(CN_TZ).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def ts_to_iso(t):
     try:
-        return datetime.fromtimestamp(int(t)).strftime("%Y-%m-%d %H:%M:%S")
+        return datetime.fromtimestamp(int(t), CN_TZ).strftime("%Y-%m-%d %H:%M:%S")
     except Exception:
         return ""
 

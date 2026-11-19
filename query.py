@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """查询与导出：python query.py [sessions|streamers|status|export]"""
 import argparse, csv, os, sqlite3, sys
+from datetime import datetime, timezone, timedelta
 import config as C
 import db
 
+CN_TZ = timezone(timedelta(hours=8))
 OUT_DIR = os.path.join(C.BASE_DIR, "output")
 
 
@@ -77,16 +79,15 @@ def q_status(conn, args):
     print(f"主播总数: {conn.execute('SELECT COUNT(*) FROM streamers').fetchone()[0]}")
     print(f"场次总数: {conn.execute('SELECT COUNT(*) FROM sessions').fetchone()[0]}")
     from datetime import datetime, timedelta
-    threshold = (datetime.now() - timedelta(minutes=C.POLL_INTERVAL * 3 + 120)).strftime("%Y-%m-%d %H:%M:%S")
+    threshold = (datetime.now(CN_TZ) - timedelta(minutes=C.POLL_INTERVAL * 3 + 120)).strftime("%Y-%m-%d %H:%M:%S")
     stale = conn.execute("SELECT COUNT(*) FROM poll_log WHERE ts<?", (threshold,)).fetchone()[0]
     print(f"疑似停摆(最后一轮早于阈值): {'是' if last and last['ts'] < threshold else '否'}")
 
 
 def q_export(conn, args):
     os.makedirs(OUT_DIR, exist_ok=True)
-    import datetime as dt
     # --fixed: CI 固定文件名覆盖，便于 git 只提交变化
-    tag = "latest" if getattr(args, "fixed", False) else dt.datetime.now().strftime("%Y%m%d_%H%M")
+    tag = "latest" if getattr(args, "fixed", False) else datetime.now(CN_TZ).strftime("%Y%m%d_%H%M")
 
     # 空结果保护：库里没有任何场次且不是明确要求，拒绝导出（防止接口改版后静默清空）
     n = conn.execute("SELECT COUNT(*) FROM sessions").fetchone()[0]
@@ -125,7 +126,7 @@ def q_export(conn, args):
     """).fetchall()
     all_s = conn.execute("SELECT COUNT(*) FROM sessions").fetchone()[0]
     with open(f3, "w", encoding="utf-8") as f:
-        f.write(f"# 钢铁指挥官 B站直播记录（截至 {dt.datetime.now():%Y-%m-%d %H:%M}）\n\n")
+        f.write(f"# 钢铁指挥官 B站直播记录（截至 {datetime.now(CN_TZ):%Y-%m-%d %H:%M}）\n\n")
         f.write(f"- 累计场次：**{all_s}**\n")
         f.write(f"- 明确命中关键词场次：**{len(hits)}**\n")
         f.write(f"- 追踪主播数：**{conn.execute('SELECT COUNT(*) FROM streamers').fetchone()[0]}**\n\n")
