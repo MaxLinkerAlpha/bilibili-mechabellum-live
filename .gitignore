@@ -19,3 +19,9 @@ output/*_2026*.md
 # 数据库备份文件（含历史快照，非必需，不上传）
 *.db.bak*
 probe_alias.py
+
+# Cloudflare Worker 本地依赖与持久化
+cf-worker/node_modules/
+cf-worker/.mf/
+cf-worker/.wrangler/
+cf-worker/wrangler.toml.bak

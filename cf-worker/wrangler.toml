@@ -1,0 +1,13 @@
+name = "mechabellum-live-recorder"
+main = "src/index.js"
+compatibility_date = "2026-11-24"
+
+# 每5分钟采集一轮（UTC，分钟字段）
+[triggers]
+crons = ["*/5 * * * *"]
+
+# Max 建好 D1 后，把 database_id 换成真实的（下面占位符必须替换）
+[[d1_databases]]
+binding = "DB"
+database_name = "mechabellum-live"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
