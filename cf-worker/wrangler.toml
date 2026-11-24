@@ -10,4 +10,4 @@ crons = ["*/5 * * * *"]
 [[d1_databases]]
 binding = "DB"
 database_name = "mechabellum-live"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "51382aec-fc69-471e-9ce3-9a1856c876af"

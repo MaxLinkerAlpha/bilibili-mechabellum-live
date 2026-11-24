@@ -12,7 +12,19 @@ async function api(url, { params, referer = "https://www.bilibili.com/", method 
     for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== null) q.set(k, String(v));
     u += "?" + q.toString();
   }
-  const headers = { "User-Agent": UA, Referer: referer, Accept: "application/json, text/plain, */*" };
+  const headers = {
+    "User-Agent": UA,
+    Referer: referer,
+    Origin: new URL(referer).origin,
+    Accept: "application/json, text/plain, */*",
+    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Cache-Control": "no-cache",
+  };
+  // 带匿名 buvid3（getBuvid 每轮先跑）。数据中心 IP 无 cookie 极易 412。
+  if (cachedBuvid) headers["Cookie"] = cachedBuvid;
   let payload;
   if (body !== undefined) {
     headers["Content-Type"] = "application/json";
@@ -32,10 +44,17 @@ let cachedBuvid = null;
 async function getBuvid() {
   if (cachedBuvid) return cachedBuvid;
   try {
-    const r = await fetch("https://www.bilibili.com/", { headers: { "User-Agent": UA } });
+    const r = await fetch("https://www.bilibili.com/", {
+      headers: { "User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9" },
+    });
+    // Workers 的 headers.get('set-cookie') 会把多个 cookie 合并成一行
     const sc = r.headers.get("set-cookie") || "";
-    const m = sc.match(/buvid3=([^;]+)/);
-    cachedBuvid = m ? `buvid3=${m[1]}` : "";
+    const parts = [];
+    for (const name of ["buvid3", "b_nut", "buvid4", "_uuid"]) {
+      const m = sc.match(new RegExp(name + "=([^;]+)"));
+      if (m) parts.push(`${name}=${m[1]}`);
+    }
+    cachedBuvid = parts.join("; ");
   } catch {
     cachedBuvid = "";
   }
