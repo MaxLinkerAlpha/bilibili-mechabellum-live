@@ -2,9 +2,8 @@ name = "mechabellum-live-recorder"
 main = "src/index.js"
 compatibility_date = "2026-11-24"
 
-# 每5分钟采集一轮（UTC，分钟字段）
-[triggers]
-crons = ["*/5 * * * *"]
+# 已停用：改用腾讯云 SCF 采集（cf-worker 已废弃，仅留代码参考）
+# 原 cron: */5 * * * *  —— 因 B站 封 Cloudflare IP 段，持续 412，已移除触发器
 
 # Max 建好 D1 后，把 database_id 换成真实的（下面占位符必须替换）
 [[d1_databases]]

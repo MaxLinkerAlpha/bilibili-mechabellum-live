@@ -1,5 +1,15 @@
 # Cloudflare Worker 部署清单
 
+> ## ⛔ 已废弃（2026-11-24）
+> **本项目已迁移到腾讯云 SCF（广州地域）+ COS**，原因：B站 对 Cloudflare IP 段整段封禁，Worker 持续 412，无法采集。
+>
+> - Cloudflare Worker `mechabellum-live-recorder` **已删除**
+> - cron 触发器已清空（`schedules: []`）
+> - D1 数据库 `mechabellum-live` 保留（88KB，含 44 场历史，免费，作备份）
+> - 采集与看板见 `../scf/README-DEPLOY.md`、`../feishu/README-FEISHU.md`
+>
+> 以下内容仅作历史留存，不要按此部署。
+
 代码已全部写好并本地验证通过（抓到 2 场真实直播、时区/去重/命中判定/打包/迁移 SQL 全 PASS）。
 **只剩 Cloudflare 账号相关步骤必须 Max 本人做**——我不能替你登录账号或创建云资源。
 
