@@ -20,8 +20,10 @@ https://nwcg0ef2w70.feishu.cn/share/base/dashboard/shrcnMTifZyIGsw9vB0qYppDg3f
 ## 自动化更新（待你最后一步）
 
 代码已写好：`scf/index_cos_feishu.py`
-- 每轮 SCF 采集后自动同步到飞书两张表（幂等，新增+更新峰值）
-- 失败不影响采集主流程，日志记 `FEISHU_SYNC_FAIL`
+- **飞书每 7 天同步一次**（COS 是权威数据源，飞书只做周更协作看板）
+- 每轮 SCF 采集照常每 5 分钟，但绝大多数轮次**不碰飞书**（日志 `feishu:skip`），天然规避超时
+- 距上次同步 ≥7 天才执行；失败不影响采集主流程，日志记 `FEISHU_SYNC_FAIL`
+- 手动立即刷新：测试事件传 `{"action": "feishu_sync"}`
 
 **你需要做**：
 

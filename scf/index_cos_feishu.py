@@ -403,20 +403,29 @@ def collect():
         notes.append("backup_fail:" + repr(e)[:60])
         print("BACKUP_FAIL", repr(e))
 
-    # 飞书同步：仅在数据有变化时执行（避免每轮两次全表扫描拖慢函数）
-    # 变化指纹 = 场次数 + 全部峰值之和；与上次同步记录比对
-    sig = f"{len(sessions_by_key)}|{sum(int(s.get('peak_online') or 0) for s in sessions_by_key.values())}"
+    # 飞书同步：每周一次（>=7天）。COS 是权威数据源，飞书只做周更协作看板。
+    # 绝大多数轮次只采集不碰飞书，天然规避超时。
+    FS_SYNC_DAYS = 7
     fs_result = None
-    if data.get("feishu_sig") != sig:
+    last_fs = data.get("last_feishu_sync") or ""
+    need_sync = True
+    if last_fs:
+        try:
+            d0 = datetime.strptime(last_fs, "%Y-%m-%d %H:%M:%S")
+            d1 = datetime.strptime(now, "%Y-%m-%d %H:%M:%S")
+            need_sync = (d1 - d0).days >= FS_SYNC_DAYS
+        except Exception:
+            need_sync = True
+    if need_sync:
         try:
             fs_result = feishu_sync(data)
-            data["feishu_sig"] = sig
-            # 记录同步指纹，避免下一轮重复全量同步
+            data["last_feishu_sync"] = now
             try:
                 cos_put(data)
             except Exception:
                 pass
-            notes.append("feishu:+" + str(fs_result.get("sessions_created", 0)))
+            notes.append("feishu:" + str(fs_result.get("sessions_created", 0)))
+            print("FEISHU_SYNC_DONE", json.dumps(fs_result, ensure_ascii=False))
         except Exception as e:
             notes.append("feishu_fail:" + repr(e)[:80])
             print("FEISHU_SYNC_FAIL", repr(e))
@@ -613,6 +622,13 @@ def main_handler(event, context):
             return _status()
         if action == "import_history":
             return import_history()
+        if action == "feishu_sync":
+            # 手动强制同步到飞书（不用等 7 天）
+            data = cos_get()
+            r = feishu_sync(data)
+            data["last_feishu_sync"] = now_cn()
+            cos_put(data)
+            return r
     return collect()
 
 
