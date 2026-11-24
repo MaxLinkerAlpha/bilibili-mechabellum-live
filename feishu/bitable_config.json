@@ -1,0 +1,58 @@
+{
+  "app_token": "W6GibvSbTatW40sdx5icUJNrneg",
+  "table_id": "tbloZEq73EUyRD96",
+  "fields": [
+    {
+      "name": "开播时间",
+      "field_id": "fldprkt3Qv"
+    },
+    {
+      "name": "主播",
+      "field_id": "fldZOnvuMn"
+    },
+    {
+      "name": "标题",
+      "field_id": "fldQeuWicc"
+    },
+    {
+      "name": "命中关键词",
+      "field_id": "fldFTMIHn8"
+    },
+    {
+      "name": "峰值人气",
+      "field_id": "fldgK9FKlF"
+    },
+    {
+      "name": "直播间",
+      "field_id": "fldJn44oTX"
+    },
+    {
+      "name": "场次ID",
+      "field_id": "fldafvVcI4"
+    },
+    {
+      "name": "观测时长",
+      "field_id": "fldyMLkiv9"
+    }
+  ],
+  "stats_table_id": "tblzkQQj1zM45FYF",
+  "stats_fields": [
+    {
+      "name": "直播场次",
+      "field_id": "fldp88ws7o"
+    },
+    {
+      "name": "命中场次",
+      "field_id": "fldoJ3bta0"
+    },
+    {
+      "name": "最高人气",
+      "field_id": "fldNsV5S5s"
+    },
+    {
+      "name": "最近开播",
+      "field_id": "fldtw3KfXv"
+    }
+  ],
+  "stats_primary": "多行文本"
+}
