@@ -403,14 +403,25 @@ def collect():
         notes.append("backup_fail:" + repr(e)[:60])
         print("BACKUP_FAIL", repr(e))
 
-    # 飞书同步（每轮，幂等；失败不影响采集主流程）
+    # 飞书同步：仅在数据有变化时执行（避免每轮两次全表扫描拖慢函数）
+    # 变化指纹 = 场次数 + 全部峰值之和；与上次同步记录比对
+    sig = f"{len(sessions_by_key)}|{sum(int(s.get('peak_online') or 0) for s in sessions_by_key.values())}"
     fs_result = None
-    try:
-        fs_result = feishu_sync(data)
-        notes.append("feishu:+" + str(fs_result.get("sessions_created", 0)))
-    except Exception as e:
-        notes.append("feishu_fail:" + repr(e)[:80])
-        print("FEISHU_SYNC_FAIL", repr(e))
+    if data.get("feishu_sig") != sig:
+        try:
+            fs_result = feishu_sync(data)
+            data["feishu_sig"] = sig
+            # 记录同步指纹，避免下一轮重复全量同步
+            try:
+                cos_put(data)
+            except Exception:
+                pass
+            notes.append("feishu:+" + str(fs_result.get("sessions_created", 0)))
+        except Exception as e:
+            notes.append("feishu_fail:" + repr(e)[:80])
+            print("FEISHU_SYNC_FAIL", repr(e))
+    else:
+        notes.append("feishu:skip")
 
     result = {"ts": now, "status": status, "rooms_found": len(rooms),
               "live_count": len(live_keys), "uid_checked": len(pool),

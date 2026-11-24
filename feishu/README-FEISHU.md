@@ -25,6 +25,9 @@ https://nwcg0ef2w70.feishu.cn/share/base/dashboard/shrcnMTifZyIGsw9vB0qYppDg3f
 
 **你需要做**：
 
+0. ⚠️ **先把执行超时调到 60 秒**——默认 3 秒必然超时。
+   函数配置 → 编辑 → 「执行超时时间」填 **60** → 保存
+
 1. SCF 环境变量**再加两个**（用 .env 里那对飞书凭证）：
    | key | value |
    |---|---|
