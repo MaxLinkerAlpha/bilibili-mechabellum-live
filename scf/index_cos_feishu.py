@@ -592,7 +592,10 @@ def feishu_sync(data):
     # 主播统计表
     stat = defaultdict(lambda: {"total": 0, "hit": 0, "peak": 0, "last": ""})
     for s in sessions:
-        n = uname(s); v = stat[n]
+        n = uname(s)
+        if n.startswith("uid:"):
+            continue  # 无真实主播名的不进统计，避免产生 uid:xxx 冗余记录
+        v = stat[n]
         v["total"] += 1
         if s.get("hit_keyword"):
             v["hit"] += 1
