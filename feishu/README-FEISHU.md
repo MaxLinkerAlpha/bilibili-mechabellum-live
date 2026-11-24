@@ -24,6 +24,12 @@ https://nwcg0ef2w70.feishu.cn/share/base/dashboard/shrcnMTifZyIGsw9vB0qYppDg3f
 - 每轮 SCF 采集照常每 5 分钟，但绝大多数轮次**不碰飞书**（日志 `feishu:skip`），天然规避超时
 - 距上次同步 ≥7 天才执行；失败不影响采集主流程，日志记 `FEISHU_SYNC_FAIL`
 - 手动立即刷新：测试事件传 `{"action": "feishu_sync"}`
+- 修补历史场次空主播名：测试事件传 `{"action": "fix_uname"}`（修完再跑 feishu_sync 刷新飞书）
+
+## 已知修复记录
+历史 44 场首次导入时漏了 uname 字段，导致飞书表主播名空白。已修复：
+- HISTORY_SEED 现在带 uname（11 字段）
+- `fix_uname` 动作可修补 COS 里已存在的空 uname 场次
 
 **你需要做**：
 
