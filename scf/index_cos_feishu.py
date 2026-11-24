@@ -637,8 +637,17 @@ def main_handler(event, context):
                     if not ss[k].get("room_id"):
                         ss[k]["room_id"] = room
                     fixed += 1
+            # 顺带补齐 streamers 表（import_history 当初只导了场次）
+            st_dict = d.setdefault("streamers", {})
+            added_st = 0
+            for row in HISTORY_SEED:
+                uid, un = row[0], row[1]
+                if un and str(uid) not in st_dict:
+                    st_dict[str(uid)] = {"uname": un, "room_id": row[2], "source": "history"}
+                    added_st += 1
             cos_put(d)
-            return {"fixed": fixed, "sessions_total": len(ss)}
+            return {"fixed": fixed, "streamers_added": added_st,
+                    "sessions_total": len(ss), "streamers_total": len(st_dict)}
         if action == "feishu_sync":
             # 手动强制同步到飞书（不用等 7 天）
             data = cos_get()
